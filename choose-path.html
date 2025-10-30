@@ -93,10 +93,31 @@
       100% { opacity: 0; }
     }
     @media (max-width: 768px) {
+      /* Stack cards vertically and reduce sizing to avoid clutter */
       .flex-row { flex-direction: column !important; }
-      .gap-12 { gap: 2rem !important; }
+      .gap-12 { gap: 1.25rem !important; }
       .w-72 { width: 90vw !important; }
-      .p-8 { padding: 1.5rem !important; }
+      .p-8 { padding: 1rem !important; }
+
+      /* Make cards fit the viewport better on small screens */
+      .card-flip {
+        min-width: unset !important;
+        min-height: unset !important;
+        width: 92vw !important;
+        max-width: 420px !important;
+        height: auto !important;
+        padding: 1.25rem !important;
+      }
+      .card-flip .card-inner { min-height: unset !important; }
+      .card-front .text-8xl { font-size: 4rem !important; margin-bottom: 0.5rem !important; }
+      .card-front .text-xl { font-size: 1rem !important; }
+
+      /* Reduce heading size and remove bounce to reduce distraction */
+      .text-3xl { font-size: 1.6rem !important; }
+      .animate-bounce { animation: none !important; }
+
+      /* Hide decorative doodles on small screens */
+      .doodle { display: none !important; }
     }
   </style>
 </head>
