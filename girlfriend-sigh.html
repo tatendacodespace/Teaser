@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sigh...</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background: linear-gradient(135deg, #fce4ec 0%, #ffeef8 100%); 
+            min-height: 100vh;
+            font-family: 'Indie Flower', cursive;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-6 text-center">
+    <div class="max-w-lg w-full bg-white/60 rounded-3xl shadow-2xl p-8 backdrop-blur-sm ring-1 ring-pink-100">
+        <h1 class="text-2xl mb-6 text-pink-700 font-bold">
+            Girlfriend njani when u don't respond to my texts or call wena, mxaaaa
+        </h1>
+        
+        <video class="w-full max-w-md mx-auto rounded-xl shadow-lg mb-8" autoplay loop muted playsinline>
+            <source src="img/sigh-video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <button onclick="window.location='girlfriend-confirm.html'" class="px-8 py-3 bg-pink-400 hover:bg-pink-500 text-white rounded-full font-semibold shadow-md transition transform hover:scale-105">
+            Continue Anyway...
+        </button>
+    </div>
+
+    <script>
+        // Add animation when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.max-w-lg');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                container.style.transition = 'all 0.6s ease-out';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body>
+</html>

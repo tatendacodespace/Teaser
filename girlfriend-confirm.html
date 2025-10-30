@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Girlfriend Selected</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
+  <style>
+    body { background: linear-gradient(135deg, #fce4ec 0%, #ffeef8 100%); min-height:100vh; }
+    .handwritten { font-family: 'Indie Flower', cursive; }
+    .confetti { position: absolute; width: 12px; height: 12px; border-radius: 50%; opacity: 0.9; pointer-events: none; }
+    .progress-bar { position: fixed; top: 0; left: 0; width: 100vw; height: 8px; background: linear-gradient(90deg, #f472b6 0%, #b388ff 100%); box-shadow: 0 2px 8px #b388ff44; animation: progress 1.5s linear forwards; }
+    @keyframes progress { from { width: 0; } to { width: 100vw; } }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen relative">
+  <div class="progress-bar"></div>
+  <div id="confetti-root"></div>
+
+  <!-- Chat-style layout -->
+  <div class="z-10 flex items-center justify-center p-6 w-full">
+    <div class="w-full max-w-md bg-white/60 rounded-3xl shadow-2xl ring-1 ring-pink-100 overflow-hidden" style="backdrop-filter: blur(6px);">
+      <header class="px-6 py-4 bg-pink-50 flex items-center gap-4">
+        <div class="relative">
+          <img src="img/Avatar.jpg" class="w-12 h-12 rounded-full object-cover ring-2 ring-pink-200" alt="Owethu's profile picture" />
+          <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
+        </div>
+        <div class="flex-grow">
+          <div class="text-lg font-bold text-pink-700 handwritten">Owethu Ngwenya</div>
+          <div class="text-xs text-green-500">Online</div>
+        </div>
+        <div class="text-sm text-pink-600">💕</div>
+      </header>
+
+      <main id="chat" class="p-4 h-72 overflow-y-auto bg-gradient-to-b from-pink-50 to-transparent flex flex-col gap-3">
+        <!-- messages injected by JS -->
+      </main>
+
+      <footer class="px-4 py-3 bg-white flex items-center gap-3">
+        <button id="spamBtn" class="px-3 py-2 bg-pink-100 text-pink-700 rounded-full text-sm handwritten">Spam her</button>
+        <button id="continueBtn" class="ml-auto px-4 py-2 bg-pink-400 hover:bg-pink-500 text-white rounded-full font-semibold shadow-md transition">Continue</button>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    
+    // Real chat history
+    const messages = [
+      { text: "Hey, how are you?", fromMe: true, time: "2025-10-24T09:34:00" },
+      { text: "i'm okay, you?", fromMe: false, time: "2025-10-24T10:55:00" },
+      { text: "I'm chilling", fromMe: true, time: "2025-10-24T11:16:00" },
+      { text: "You still around?", fromMe: true, time: "2025-10-24T11:16:00" },
+      { text: "yeah", fromMe: false, time: "2025-10-24T11:18:00" },
+      { text: "Come up the road, I'm outside", fromMe: true, time: "2025-10-24T11:19:00" },
+      { text: "i'm not at my uncle's place", fromMe: false, time: "2025-10-24T11:43:00" },
+      { text: "Sigh🫩", fromMe: true, time: "2025-10-24T11:49:00" },
+      { text: "Where are you?", fromMe: true, time: "2025-10-24T11:49:00" },
+      { text: "Cbd, at my cousins place", fromMe: false, time: "2025-10-24T11:50:00" },
+      { text: "Come visit your uncle for a bit", fromMe: true, time: "2025-10-24T11:56:00" },
+      { text: "they don't even know i'm this side 😂", fromMe: false, time: "2025-10-24T11:57:00" },
+      { text: "once he sees me he's going to tell my father", fromMe: false, time: "2025-10-24T11:57:00" },
+      { text: "Then just come to me then I'll feed you", fromMe: true, time: "2025-10-24T12:00:00" },
+      { text: "When are you leaving", fromMe: true, time: "2025-10-24T13:17:00" },
+      { text: "Sunday", fromMe: false, time: "2025-10-24T13:29:00" },
+      { text: "What are you doing right now?", fromMe: true, time: "2025-10-24T13:46:00" },
+      { text: "i'm getting ready to go out so i'm helping my cousin clean", fromMe: false, time: "2025-10-24T14:44:00" },
+      { text: "Wait so how do you breathe", fromMe: true, time: "2025-10-24T18:47:00" },
+      { text: "wdym?", fromMe: false, time: "2025-10-24T18:54:00" },
+      { text: "How do you breath without me around", fromMe: true, time: "2025-10-24T18:59:00" },
+      { text: "hey", fromMe: false, time: "2025-10-29T15:19:00" }
+    ];
+
+    // Messages to send after showing chat history
+    const ignoreMessages = [
+        "Yah wena",
+      "Why you ignoring meeeee",
+      "with yo nonchalant ass",
+      "Text me back yeses?",
+      "Girlfriend Njanii?"
+    ];
+
+    // Set up avatar with error handling
+    window.owethuAvatar = window.owethuAvatar || 'img/Avatar.jpg';
+    
+    // Verify header avatar loads
+    const headerAvatar = document.querySelector('header img');
+    headerAvatar.onerror = function() {
+      const fallback = document.createElement('div');
+      fallback.className = 'w-12 h-12 rounded-full flex items-center justify-center text-lg bg-pink-100 text-pink-700 font-bold ring-2 ring-pink-200';
+      fallback.textContent = 'O';
+      headerAvatar.replaceWith(fallback);
+    };
+
+    // Message rendering with avatar, timestamp and delivery/read ticks
+    function formatTime(date) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function createAvatarElement(fromMe) {
+      const img = document.createElement('img');
+      img.className = 'w-8 h-8 rounded-full object-cover';
+      img.style.flex = '0 0 auto';
+      img.style.boxShadow = '0 2px 6px rgba(0,0,0,0.06)';
+      
+      if (fromMe) {
+        img.src = 'img/tats.jpg';
+        img.onerror = function() {
+          const fallback = document.createElement('div');
+          fallback.className = 'w-8 h-8 rounded-full flex items-center justify-center text-sm';
+          fallback.textContent = 'T';
+          fallback.style.background = '#f472b6';
+          fallback.style.color = '#fff';
+          fallback.style.boxShadow = '0 2px 6px rgba(0,0,0,0.06)';
+          img.replaceWith(fallback);
+        };
+      } else {
+        img.src = window.owethuAvatar;
+        img.onerror = function() {
+          const fallback = document.createElement('div');
+          fallback.className = 'w-8 h-8 rounded-full flex items-center justify-center text-sm';
+          fallback.textContent = 'O';
+          fallback.style.background = '#fff';
+          fallback.style.color = '#f472b6';
+          fallback.style.boxShadow = '0 2px 6px rgba(0,0,0,0.06)';
+          img.replaceWith(fallback);
+        };
+      }
+      return img;
+    }
+
+    function createMessageNode(text, opts = {}) {
+      const { fromMe = true, timestamp = new Date(), status = 'sent' } = opts;
+
+      const row = document.createElement('div');
+      row.className = 'flex items-end gap-3 ' + (fromMe ? 'justify-end' : 'justify-start');
+
+      // Avatar
+      const avatarEl = createAvatarElement(fromMe);
+
+      // bubble
+      const bubbleWrap = document.createElement('div');
+      bubbleWrap.className = 'flex flex-col items-' + (fromMe ? 'end' : 'start');
+      bubbleWrap.style.maxWidth = '68%';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'px-4 py-2 handwritten break-words rounded-2xl';
+      bubble.style.boxShadow = '0 8px 20px rgba(179,92,143,0.06)';
+      bubble.style.background = fromMe ? '#f472b6' : '#fff';
+      bubble.style.color = fromMe ? '#fff' : '#a21caf';
+      bubble.style.border = fromMe ? 'none' : '1px solid #fde8f2';
+      bubble.textContent = text;
+
+      // meta (time + ticks)
+      const meta = document.createElement('div');
+      meta.className = 'text-xs text-pink-500 mt-1 flex items-center gap-2';
+      meta.style.opacity = '0.85';
+      const time = document.createElement('span');
+      time.textContent = formatTime(timestamp);
+      meta.appendChild(time);
+      let ticksSpan = null;
+      if (fromMe) {
+        ticksSpan = document.createElement('span');
+        ticksSpan.innerHTML = status === 'delivered' ? '&#10003;&#10003;' : '&#10003;';
+        ticksSpan.style.transition = 'color 200ms ease';
+        meta.appendChild(ticksSpan);
+      }
+
+      bubbleWrap.appendChild(bubble);
+      bubbleWrap.appendChild(meta);
+
+      if (fromMe) {
+        row.appendChild(bubbleWrap);
+        row.appendChild(avatarEl);
+      } else {
+        row.appendChild(avatarEl);
+        row.appendChild(bubbleWrap);
+      }
+
+      // After inserting, if fromMe, flip tick to double after a short delay to simulate delivered; then occasionally mark read
+      if (fromMe && ticksSpan) {
+        setTimeout(() => {
+          ticksSpan.innerHTML = '&#10003;&#10003;';
+          // 25% chance to mark as 'read' (change color to blue after another delay)
+          if (Math.random() < 0.25) {
+            setTimeout(() => { ticksSpan.style.color = '#3b82f6'; }, 1400 + Math.random()*1800);
+          }
+        }, 600 + Math.random()*800);
+      }
+
+      return row;
+    }
+
+    // Typing indicator bubble (for the recipient)
+    function createTypingNode(fromMe = false) {
+      const row = document.createElement('div');
+      row.className = 'flex items-end gap-3 ' + (fromMe ? 'justify-end' : 'justify-start');
+
+      const avatarEl = createAvatarElement(fromMe);
+
+      const bubble = document.createElement('div');
+      bubble.className = 'px-4 py-2 rounded-2xl';
+      bubble.style.minWidth = '48px';
+      bubble.style.display = 'flex';
+      bubble.style.alignItems = 'center';
+      bubble.style.justifyContent = 'center';
+
+      if (fromMe) {
+        bubble.style.background = '#fdf2f8';
+        bubble.style.border = '1px solid #fbcfe8';
+      } else {
+        bubble.style.background = '#fff';
+        bubble.style.border = '1px solid #fde8f2';
+      }
+
+      const dots = document.createElement('div');
+      dots.className = 'typing-dots';
+      const dotColor = fromMe ? '#f472b6' : '#f472b6';
+      dots.innerHTML = `<span style="display:inline-block;width:6px;height:6px;background:${dotColor};border-radius:50%;margin:0 3px;opacity:0.9"></span><span style="display:inline-block;width:6px;height:6px;background:${dotColor};border-radius:50%;margin:0 3px;opacity:0.6"></span><span style="display:inline-block;width:6px;height:6px;background:${dotColor};border-radius:50%;margin:0 3px;opacity:0.4"></span>`;
+      bubble.appendChild(dots);
+
+      if (fromMe) {
+        row.appendChild(bubble);
+        row.appendChild(avatarEl);
+      } else {
+        row.appendChild(avatarEl);
+        row.appendChild(bubble);
+      }
+
+      return row;
+    }
+
+    // Manage message queue and auto-send
+    let autoInterval = null;
+    let sentCount = 0;
+    const maxAuto = 12;
+    const curtReplies = ['brb', 'k', 'on my way', 'ok', 'lol', 'busy rn'];
+
+    function sendMessage(text) {
+      // Show my typing indicator first
+      const myTyping = createTypingNode(true);
+      chat.appendChild(myTyping);
+      chat.scrollTop = chat.scrollHeight;
+
+      // Show my message after typing
+      setTimeout(() => {
+        myTyping.remove();
+        const node = createMessageNode(text, { fromMe: true, status: 'sent', timestamp: new Date() });
+        chat.appendChild(node);
+        chat.scrollTop = chat.scrollHeight;
+        sentCount++;
+
+        // 10% chance she replies with a curt message after a delay
+        if (Math.random() < 0.10) {
+          setTimeout(() => {
+            const reply = curtReplies[Math.floor(Math.random() * curtReplies.length)];
+            const replyNode = createMessageNode(reply, { fromMe: false, timestamp: new Date() });
+            chat.appendChild(replyNode);
+            chat.scrollTop = chat.scrollHeight;
+          }, 2000 + Math.random() * 3000);
+        }
+      }, 1500 + Math.random() * 1000);
+    }
+
+    function startAutoSpam() {
+      if (autoInterval) return;
+      autoInterval = setInterval(() => {
+        if (sentCount >= maxAuto) { clearInterval(autoInterval); autoInterval = null; return; }
+        sendMessage(phrase + (Math.random() > 0.6 ? '...' : ''));
+      }, 900);
+    }
+
+    // Initialize chat instantly with real message history
+    function loadInitialChat() {
+      messages.forEach(msg => {
+        const node = createMessageNode(msg.text, {
+          fromMe: msg.fromMe,
+          timestamp: new Date(msg.time),
+          status: msg.fromMe ? 'delivered' : undefined
+        });
+        chat.appendChild(node);
+      });
+      chat.scrollTop = chat.scrollHeight;
+      
+      // Start ignore messages after a pause
+      setTimeout(() => {
+        let ignoreIndex = 0;
+        function sendNextIgnoreMessage() {
+          if (ignoreIndex >= ignoreMessages.length) return;
+          
+          // Show my typing indicator first
+          const myTyping = createTypingNode(true);
+          chat.appendChild(myTyping);
+          chat.scrollTop = chat.scrollHeight;
+
+          // Show my message after typing
+          setTimeout(() => {
+            myTyping.remove();
+            const text = ignoreMessages[ignoreIndex];
+            const node = createMessageNode(text, {
+              fromMe: true,
+              timestamp: new Date(),
+              status: 'sent'
+            });
+            chat.appendChild(node);
+            chat.scrollTop = chat.scrollHeight;
+
+            ignoreIndex++;
+            if (ignoreIndex < ignoreMessages.length) {
+              setTimeout(sendNextIgnoreMessage, 2000 + Math.random() * 3000);
+            }
+          }, 1500 + Math.random() * 1000);
+        }
+        sendNextIgnoreMessage();
+      }, 2000);
+    }
+    function sendIgnoreMessage() {
+      if (ignoreIndex >= ignoreMessages.length) return;
+      
+      const text = ignoreMessages[ignoreIndex];
+      const node = createMessageNode(text, {
+        fromMe: true,
+        timestamp: new Date(),
+        status: 'sent'
+      });
+      chat.appendChild(node);
+      chat.scrollTop = chat.scrollHeight;
+
+      // Show longer typing indicators that don't result in responses
+      const typing = createTypingNode();
+      chat.appendChild(typing);
+      chat.scrollTop = chat.scrollHeight;
+
+      // Remove typing after a longer delay and don't send response
+      setTimeout(() => {
+        typing.remove();
+        ignoreIndex++;
+        // Longer delays between ignore messages
+        if (ignoreIndex < ignoreMessages.length) {
+          setTimeout(sendIgnoreMessage, 2000 + Math.random() * 3000);
+        }
+      }, 3000 + Math.random() * 2000);
+    }
+
+    // Load chat history immediately
+    loadInitialChat();
+
+    // Spam button sends random ignore message
+    document.getElementById('spamBtn').addEventListener('click', () => {
+      const text = ignoreMessages[Math.floor(Math.random() * ignoreMessages.length)];
+      sendMessage(text);
+    });
+
+    // Confetti and continue logic (unchanged behavior)
+    function burstConfettiAt(x, y, count = 36) {
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti';
+        el.style.left = (x + (Math.random()-0.5)*160) + 'px';
+        el.style.top = (y + (Math.random()-0.5)*80) + 'px';
+        el.style.background = ['#ff80ab','#b388ff','#80d8ff','#ffd180','#fff59d','#c8e6c9'][Math.floor(Math.random()*6)];
+        el.style.width = el.style.height = (6 + Math.random()*10) + 'px';
+        document.body.appendChild(el);
+        el.animate([
+          { transform: 'translateY(0) scale(1)', opacity: 1 },
+          { transform: `translateY(${80+Math.random()*120}px) translateX(${(Math.random()-0.5)*220}px) rotate(${Math.random()*360}deg)`, opacity: 0 }
+        ], { duration: 700 + Math.random()*500, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
+        setTimeout(() => el.remove(), 1400);
+      }
+    }
+
+    document.getElementById('continueBtn').addEventListener('click', function(e){
+      const rect = this.getBoundingClientRect();
+      const x = rect.left + rect.width/2;
+      const y = rect.top + rect.height/2;
+      burstConfettiAt(x, y, 36);
+      this.animate([{ transform: 'scale(1)' }, { transform: 'scale(0.96)' }, { transform: 'scale(1)' }], { duration: 220 });
+      setTimeout(() => { window.location = 'reasons.html'; }, 700);
+    });
+  </script>
+</body>
+</html>
