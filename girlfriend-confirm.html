@@ -18,6 +18,14 @@
   <div class="progress-bar"></div>
   <div id="confetti-root"></div>
 
+  <!-- Page title above the chat UI -->
+  <div class="z-10 w-full flex items-center justify-center mt-6">
+    <h1 class="text-2xl md:text-3xl font-extrabold text-pink-700 handwritten">Bhekha Nje</h1>
+  </div>
+
+  <!-- Include transition system -->
+  <script src="js/main.js"></script>
+
   <!-- Chat-style layout -->
   <div class="z-10 flex items-center justify-center p-6 w-full">
     <div class="w-full max-w-md bg-white/60 rounded-3xl shadow-2xl ring-1 ring-pink-100 overflow-hidden" style="backdrop-filter: blur(6px);">
@@ -38,7 +46,6 @@
       </main>
 
       <footer class="px-4 py-3 bg-white flex items-center gap-3">
-        <button id="spamBtn" class="px-3 py-2 bg-pink-100 text-pink-700 rounded-full text-sm handwritten">Spam her</button>
         <button id="continueBtn" class="ml-auto px-4 py-2 bg-pink-400 hover:bg-pink-500 text-white rounded-full font-semibold shadow-md transition">Continue</button>
       </footer>
     </div>
@@ -76,10 +83,11 @@
     // Messages to send after showing chat history
     const ignoreMessages = [
         "Yah wena",
-      "Why you ignoring meeeee",
+      "Is Bro ignoring me live? fedeee",
       "with yo nonchalant ass",
-      "Text me back yeses?",
-      "Girlfriend Njanii?"
+      "Responda Lapho Owethu",
+      "I had the time to make all this while waiting for you to text back cabanga",
+      "Responda lapho so i can say some cringe things i've been holding on to"
     ];
 
     // Set up avatar with error handling
@@ -347,11 +355,7 @@
     // Load chat history immediately
     loadInitialChat();
 
-    // Spam button sends random ignore message
-    document.getElementById('spamBtn').addEventListener('click', () => {
-      const text = ignoreMessages[Math.floor(Math.random() * ignoreMessages.length)];
-      sendMessage(text);
-    });
+    // (Spam button removed)
 
     // Confetti and continue logic (unchanged behavior)
     function burstConfettiAt(x, y, count = 36) {
@@ -371,14 +375,22 @@
       }
     }
 
-    document.getElementById('continueBtn').addEventListener('click', function(e){
-      const rect = this.getBoundingClientRect();
-      const x = rect.left + rect.width/2;
-      const y = rect.top + rect.height/2;
-      burstConfettiAt(x, y, 36);
-      this.animate([{ transform: 'scale(1)' }, { transform: 'scale(0.96)' }, { transform: 'scale(1)' }], { duration: 220 });
-      setTimeout(() => { window.location = 'reasons.html'; }, 700);
-    });
+    // Set up continue button with custom transition
+    handleCustomTransition(
+      document.getElementById('continueBtn'),
+      (e) => {
+        const rect = e.target.getBoundingClientRect();
+        const x = rect.left + rect.width/2;
+        const y = rect.top + rect.height/2;
+        burstConfettiAt(x, y, 36);
+        e.target.animate([
+          { transform: 'scale(1)' },
+          { transform: 'scale(0.96)' },
+          { transform: 'scale(1)' }
+        ], { duration: 220 });
+      },
+      'rose.html'
+    );
   </script>
 </body>
 </html>

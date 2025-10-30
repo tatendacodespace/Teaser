@@ -88,36 +88,33 @@
     }
     @media (max-width: 600px) {
       .envelope-outer {
-        width: 98vw;
-        height: 160px;
-        left: 0 !important;
-        bottom: 0 !important;
-        margin: 0 auto;
+        width: 340px;  /* Fixed width for better mobile display */
+        height: 220px; /* Taller height to maintain proportion */
+        margin: 1rem auto;
         transform: none !important;
         transition: none;
       }
       .envelope-outer.opened {
-        transform: none !important;
-        left: 0 !important;
-        bottom: 0 !important;
-        margin: 0 auto;
+        transform: scale(0.9) rotate(-5deg) translate(-10%, 10%) !important;
+        margin: 1rem auto;
         z-index: 2;
       }
       .paper {
-        min-height: 110px;
-        width: 97vw;
+        min-height: 180px;
+        width: 320px;
         left: 50%;
         bottom: 30px;
         transform: translate(-50%, 70%) scaleY(0.1) scale(1);
-        font-size: 1.05rem;
-        padding: 1.2rem 0.5rem 0.5rem 0.5rem;
+        font-size: 1.15rem;
+        padding: 1.5rem 1rem 1rem 1rem;
       }
       .envelope-outer.opened .paper {
-        transform: translate(-50%, -60%) scaleY(1) scale(1.01);
+        transform: translate(-50%, -40%) scaleY(1) scale(1.05);
         z-index: 20;
       }
       .envelope-container {
         overflow: visible !important;
+        padding: 2rem 1rem;
       }
     }
     .envelope-flap {
@@ -247,6 +244,13 @@
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen relative">
     <div id="hearts"></div>
+    <!-- Branding -->
+    <div class="fixed top-4 right-4 z-20">
+      <div class="text-xl font-bold text-pink-600 opacity-80 handwritten transform -rotate-6 hover:scale-110 transition-transform">
+        Made with 💝 by Tatenda
+      </div>
+    </div>
+
     <div class="envelope-container flex flex-col items-center justify-center min-h-screen">
       <div class="envelope-outer" id="envelope" onclick="toggleEnvelope()">
         <div class="envelope-flap" id="flap"></div>
